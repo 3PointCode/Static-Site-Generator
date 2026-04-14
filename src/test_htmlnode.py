@@ -1,6 +1,6 @@
 import unittest
 
-from htmlnode import HTMLNode, LeafNode
+from htmlnode import HTMLNode, LeafNode, ParentNode
 
 class TestHTMLNode(unittest.TestCase):
     def test_props_eq(self):
@@ -47,6 +47,34 @@ class TestLeafNode(unittest.TestCase):
     def test_leaf_node_without_tag(self):
         node = LeafNode(tag=None, value="Hello")
         self.assertEqual(node.to_html(), "Hello")
+
+class TestParentNode(unittest.TestCase):
+    def test_to_html_with_children(self):
+        child_node = LeafNode("span", "child")
+        parent_node = ParentNode("div", [child_node])
+        self.assertEqual(parent_node.to_html(), "<div><span>child</span></div>")
+
+    def test_to_html_with_grandchildren(self):
+        grandchild_node = LeafNode("b", "grandchild")
+        child_node = ParentNode("span", [grandchild_node])
+        parent_node = ParentNode("div", [child_node])
+        self.assertEqual(
+            parent_node.to_html(),
+            "<div><span><b>grandchild</b></span></div>",
+        )
+
+    def test_to_html_with_no_children(self):
+        with self.assertRaises(ValueError) as err:
+            parent_node = ParentNode("span", None)
+            parent_node.to_html()
+        self.assertIn("Invalid HTML: children list has no values", str(err.exception))
+
+    def test_to_html_with_no_tag(self):
+        with self.assertRaises(ValueError) as err:
+            child_node = LeafNode("b", "child")
+            parent_node = ParentNode(None, [child_node])
+            parent_node.to_html()
+        self.assertIn("Invalid HTML: no tag provided", str(err.exception))
 
 if __name__ == "__main__":
     unittest.main()
