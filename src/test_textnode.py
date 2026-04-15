@@ -1,6 +1,6 @@
 import unittest
 
-from textnode import TextNode, TextType, text_node_to_html_node
+from textnode import TextNode, TextType, text_node_to_html_node, split_nodes_delimiter
 
 class TestTextNode(unittest.TestCase):
     def test_eq(self):
@@ -40,6 +40,43 @@ class TestTextNode(unittest.TestCase):
         self.assertEqual(html_node.tag, "a")
         self.assertEqual(html_node.value, "This is a node")
         self.assertEqual(html_node.props, {"href": "www.google.com"})
+    
+    def test_split_nodes_delimeter(self):
+        node = TextNode("This is text with a `code block` word", TextType.PLAIN_TEXT)
+        new_nodes = split_nodes_delimiter([node], "`", TextType.CODE)
+        expected = [
+            TextNode("This is text with a ", TextType.PLAIN_TEXT),
+            TextNode("code block", TextType.CODE),
+            TextNode(" word", TextType.PLAIN_TEXT),
+        ]
+        self.assertEqual(new_nodes, expected)
+    
+    def test_split_nodes_delimeter_with_empty_part(self):
+        node = TextNode("`code block` word", TextType.PLAIN_TEXT)
+        new_nodes = split_nodes_delimiter([node], "`", TextType.CODE)
+        expected = [
+            TextNode("code block", TextType.CODE),
+            TextNode(" word", TextType.PLAIN_TEXT),
+        ]
+        self.assertEqual(new_nodes, expected)
 
+    def test_split_nodes_delimeter_raises(self):
+        with self.assertRaises(Exception) as err:
+            node = TextNode("`code block word", TextType.PLAIN_TEXT)
+            split_nodes_delimiter([node], "`", TextType.CODE)
+        self.assertIn("Invalid markdown text provided", str(err.exception))
+
+    def test_split_nodes_delimeter_mutiple(self):
+        node = TextNode("**This** is **text** with a **bold text** word", TextType.PLAIN_TEXT)
+        new_nodes = split_nodes_delimiter([node], "**", TextType.BOLD)
+        expected = [
+            TextNode("This", TextType.BOLD),
+            TextNode(" is ", TextType.PLAIN_TEXT),
+            TextNode("text", TextType.BOLD),
+            TextNode(" with a ", TextType.PLAIN_TEXT),
+            TextNode("bold text", TextType.BOLD),
+            TextNode(" word", TextType.PLAIN_TEXT),
+        ]
+        self.assertEqual(new_nodes, expected)
 if __name__ == "__main__":
     unittest.main()
