@@ -143,7 +143,7 @@ def olist_to_html_node(block):
     html_items = []
 
     for item in items:
-        parts = items.split(". ", 1)
+        parts = item.split(". ", 1)
         text = parts[1]
         children = text_to_children(text)
         html_items.append(ParentNode("li", children))
