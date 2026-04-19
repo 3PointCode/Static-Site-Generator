@@ -1,5 +1,6 @@
 import re
 from enum import Enum
+from htmlnode import ParentNode
 
 class BlockType(Enum):
     PARAGRAPH = "paragraph",
@@ -47,3 +48,47 @@ def block_to_block_type(block):
             i += 1
         return BlockType.ORDERED_LIST
     return BlockType.PARAGRAPH
+
+def markdown_to_html_node(markdown):
+    blocks = markdown_to_blocks(markdown)
+    children = []
+
+    for block in blocks:
+        html_node = block_to_html_node(block)
+        children.append(html_node)
+    return ParentNode("div", children, None)
+
+def block_to_html_node(block):
+    block_type = block_to_block_type(block)
+
+    if block_type == BlockType.PARAGRAPH:
+        return paragraph_to_html_node(block)
+    if block_type == BlockType.HEADING:
+        return heading_to_html_node(block)
+    if block_type == BlockType.QUOTE:
+        return quote_to_html_node(block)
+    if block_type == BlockType.CODE:
+        return code_to_html_node(block)
+    if block_type == BlockType.UNORDERED_LIST:
+        return ulist_to_html_node(block)
+    if block_type == BlockType.ORDERED_LIST:
+        return olist_to_html_node(block)
+    raise ValueError("invalid block type")
+
+def paragraph_to_html_node(block):
+    pass
+
+def heading_to_html_node(block):
+    pass
+
+def quote_to_html_node(block):
+    pass
+
+def code_to_html_node(block):
+    pass
+
+def ulist_to_html_node(block):
+    pass
+
+def olist_to_html_node(block):
+    pass
